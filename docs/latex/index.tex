@@ -1,0 +1,79 @@
+\hypertarget{index_Description}{}\section{Description}\label{index_Description}
+PHPcURL is an object-\/oriented wrapper for a PHP \hyperlink{a00002}{cURL} extension.
+
+It is released under the terms of open-\/source MIT license so that you can use it even in proprietary projects. For more information look at \hyperlink{a00001}{Copyright information}.\hypertarget{index_example}{}\section{Brief examples}\label{index_example}
+\hypertarget{index_Including}{}\subsection{Including}\label{index_Including}
+Using of class is simple enough, to use it in your project simply include {\ttfamily cURL.class.php}: 
+\begin{DoxyCode}
+ include_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'classes'
+        . DIRECTORY_SEPARATOR . 'cURL.class.php';
+\end{DoxyCode}
+ Here supposed that you are saving classes in sub-\/directory {\ttfamily classes}. \hypertarget{index_Using}{}\subsection{Using}\label{index_Using}
+This include is the only thing you should do to use all features of the class in your project.
+
+After that you can create a new instance of class and perform queries you need: 
+\begin{DoxyCode}
+ try
+ {
+    $curl = new cURL;
+    if ( $curl->init( 'http://www.example.org/' ) ) $curl->exec();
+ } catch( cURLException $e ) {
+    // cURL is not installed
+    print_r( $e->getMessage() );
+ }
+\end{DoxyCode}
+ The example above will output to browser contents of the www.example.org.
+
+As you can see we didn't close created session as this class does it for us automaticaly. \hypertarget{index_complex_example}{}\subsection{Some more complex example}\label{index_complex_example}
+Sometimes you might have to pass some parameters to \hyperlink{a00002}{cURL} to control your script execution. In such cases you have three ways to do it:
+\begin{DoxyItemize}
+\item Class constructor: to specify default transfer options. It has one option that can not be overwritten later.
+\item {\ttfamily init( \$url, array( option =$>$ value ) );} second parameter to rewrite defaults assigned by constructor.
+\item Or you can change some options of already existed transfers with the {\ttfamily set\_\-option( option, \$value \mbox{[}, \$n\mbox{]} ) );} and {\ttfamily set\_\-options( array( option =$>$ value ) \mbox{[}, \$n\mbox{]} );} functions.
+\end{DoxyItemize}
+
+
+\begin{DoxyCode}
+ try
+ {
+    $curl = new cURL( array(
+        'retry'                 => 3,
+        CURLOPT_USERAGENT       => 'Mozilla/5.0 PHP cURL agent',
+        CURLOPT_RETURNTRANSFER  => TRUE
+    ) );
+    $curl->init( 'http://www.inst.tk/' );
+    $curl->init( 'http://twitter.com/', array( 'somewrongkey' => 'somewrongvalue'
+       ) );
+    $curl->init( 'http://www.google.com/', array( CURLOPT_FOLLOWLOCATION => TRUE 
+      ) );
+    $curl->exec();
+    var_dump( $curl->info() );
+    $curl->clear();
+    $curl->init( array( 'http://www.google.com/', 'www.yahoo.com', 'http://www.fl
+      ickr.com/' ) );
+    $curl->exec();
+    var_dump( $curl->info() );
+ } catch( cURLException $e ) {
+    print_r( $e->getMessage() );
+ } catch( RuntimeException $e ) {
+    print_r( $e->getMessage() );
+ } catch( Exception $e ) {
+    print_r( $e->getMessage() );
+ }
+\end{DoxyCode}
+ Note that when we initiate more than one transfer class will automaticaly perform they as multithreaded.
+
+Let's explain what we did in this example. First, we create a new object of class \hyperlink{a00002}{cURL}, but we did it in some tricky way by specifying default options for every transfer (Useragent). Second, we init'ed three different sessions but second one will not be performed 'cause it has wrong options. Third, after performing requests ( {\ttfamily exec()} ) we gathered all info about sessions. By clearing object we will forget about done sessions but will not lose default options.
+
+As you can see after clearing we initiate three others transfers but do it by using other feature: array of URL's. This time we can specify common settings for these sessions by second parameter or do it later by using {\ttfamily set\_\-option()} or {\ttfamily set\_\-options()} functions on every of them.
+
+Other feature you may have noted already we have no need to include schemas in URL's (\char`\"{}http://\char`\"{} part).
+
+Last thing that need explanation is exceptions. We should catch only three types of exceptions.
+\begin{DoxyItemize}
+\item \hyperlink{a00003}{cURLException}: for now it can be thrown only if \hyperlink{a00002}{cURL} PHP extension isn't installed on hosting.
+\item RuntimeException: throws only if error on multithreaded code occured. \hyperlink{a00003}{cURLException} is a kind of RuntimeException.
+\item DomainException: only {\ttfamily set\_\-options()} can throw it.
+\end{DoxyItemize}
+
+For more detailed description of class see it docs: \hyperlink{a00002}{cURL}. Functions with brief descriptions are listed in such order in that they are usualy accessed. 

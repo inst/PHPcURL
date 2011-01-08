@@ -44,7 +44,75 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <h1>PHPcURL Documentation</h1>  </div>
 </div>
 <div class="contents">
-</div>
+<div class="textblock"><h2><a class="anchor" id="Description"></a>
+Description</h2>
+<p>PHPcURL is an object-oriented wrapper for a PHP <a class="el" href="a00002.html" title="Object-oriented wrapper on default PHP cURL functions.">cURL</a> extension.</p>
+<p>It is released under the terms of open-source MIT license so that you can use it even in proprietary projects. For more information look at <a class="el" href="a00001.html">Copyright information</a>.</p>
+<h2><a class="anchor" id="example"></a>
+Brief examples</h2>
+<h3><a class="anchor" id="Including"></a>
+Including</h3>
+<p>Using of class is simple enough, to use it in your project simply include <code>cURL.class.php</code>: </p>
+<div class="fragment"><pre class="fragment"> include_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . <span class="stringliteral">&#39;classes&#39;</span>
+        . DIRECTORY_SEPARATOR . <span class="stringliteral">&#39;cURL.class.php&#39;</span>;
+</pre></div><p> Here supposed that you are saving classes in sub-directory <code>classes</code>. </p>
+<h3><a class="anchor" id="Using"></a>
+Using</h3>
+<p>This include is the only thing you should do to use all features of the class in your project.</p>
+<p>After that you can create a new instance of class and perform queries you need: </p>
+<div class="fragment"><pre class="fragment"> <span class="keywordflow">try</span>
+ {
+    $curl = <span class="keyword">new</span> <a class="code" href="a00002.html" title="Object-oriented wrapper on default PHP cURL functions.">cURL</a>;
+    <span class="keywordflow">if</span> ( $curl-&gt;init( <span class="stringliteral">&#39;http://www.example.org/&#39;</span> ) ) $curl-&gt;<a class="code" href="a00002.html#a127dd482f013a004d70d80ceb860064a" title="Perform a queued cURL transfers.">exec</a>();
+ } <span class="keywordflow">catch</span>( <a class="code" href="a00003.html" title="cURL specific exception.">cURLException</a> $e ) {
+    <span class="comment">// cURL is not installed</span>
+    print_r( $e-&gt;getMessage() );
+ }
+</pre></div><p> The example above will output to browser contents of the www.example.org.</p>
+<p>As you can see we didn't close created session as this class does it for us automaticaly. </p>
+<h3><a class="anchor" id="complex_example"></a>
+Some more complex example</h3>
+<p>Sometimes you might have to pass some parameters to <a class="el" href="a00002.html" title="Object-oriented wrapper on default PHP cURL functions.">cURL</a> to control your script execution. In such cases you have three ways to do it:</p>
+<ul>
+<li>Class constructor: to specify default transfer options. It has one option that can not be overwritten later.</li>
+<li><code>init( $url, array( option =&gt; value ) );</code> second parameter to rewrite defaults assigned by constructor.</li>
+<li>Or you can change some options of already existed transfers with the <code>set_option( option, $value [, $n] ) );</code> and <code>set_options( array( option =&gt; value ) [, $n] );</code> functions.</li>
+</ul>
+<div class="fragment"><pre class="fragment"> <span class="keywordflow">try</span>
+ {
+    $curl = <span class="keyword">new</span> <a class="code" href="a00002.html" title="Object-oriented wrapper on default PHP cURL functions.">cURL</a>( array(
+        <span class="stringliteral">&#39;retry&#39;</span>                 =&gt; 3,
+        CURLOPT_USERAGENT       =&gt; <span class="stringliteral">&#39;Mozilla/5.0 PHP cURL agent&#39;</span>,
+        CURLOPT_RETURNTRANSFER  =&gt; TRUE
+    ) );
+    $curl-&gt;init( <span class="stringliteral">&#39;http://www.inst.tk/&#39;</span> );
+    $curl-&gt;init( <span class="stringliteral">&#39;http://twitter.com/&#39;</span>, array( <span class="stringliteral">&#39;somewrongkey&#39;</span> =&gt; <span class="stringliteral">&#39;somewrongvalue&#39;</span> ) );
+    $curl-&gt;init( <span class="stringliteral">&#39;http://www.google.com/&#39;</span>, array( CURLOPT_FOLLOWLOCATION =&gt; TRUE ) );
+    $curl-&gt;exec();
+    var_dump( $curl-&gt;info() );
+    $curl-&gt;clear();
+    $curl-&gt;init( array( <span class="stringliteral">&#39;http://www.google.com/&#39;</span>, <span class="stringliteral">&#39;www.yahoo.com&#39;</span>, <span class="stringliteral">&#39;http://www.flickr.com/&#39;</span> ) );
+    $curl-&gt;exec();
+    var_dump( $curl-&gt;info() );
+ } <span class="keywordflow">catch</span>( <a class="code" href="a00003.html" title="cURL specific exception.">cURLException</a> $e ) {
+    print_r( $e-&gt;getMessage() );
+ } <span class="keywordflow">catch</span>( RuntimeException $e ) {
+    print_r( $e-&gt;getMessage() );
+ } <span class="keywordflow">catch</span>( Exception $e ) {
+    print_r( $e-&gt;getMessage() );
+ }
+</pre></div><p> Note that when we initiate more than one transfer class will automaticaly perform they as multithreaded.</p>
+<p>Let's explain what we did in this example. First, we create a new object of class <a class="el" href="a00002.html" title="Object-oriented wrapper on default PHP cURL functions.">cURL</a>, but we did it in some tricky way by specifying default options for every transfer (Useragent). Second, we init'ed three different sessions but second one will not be performed 'cause it has wrong options. Third, after performing requests ( <code>exec()</code> ) we gathered all info about sessions. By clearing object we will forget about done sessions but will not lose default options.</p>
+<p>As you can see after clearing we initiate three others transfers but do it by using other feature: array of URL's. This time we can specify common settings for these sessions by second parameter or do it later by using <code>set_option()</code> or <code>set_options()</code> functions on every of them.</p>
+<p>Other feature you may have noted already we have no need to include schemas in URL's ("http://" part).</p>
+<p>Last thing that need explanation is exceptions. We should catch only three types of exceptions.</p>
+<ul>
+<li><a class="el" href="a00003.html" title="cURL specific exception.">cURLException</a>: for now it can be thrown only if <a class="el" href="a00002.html" title="Object-oriented wrapper on default PHP cURL functions.">cURL</a> PHP extension isn't installed on hosting.</li>
+<li>RuntimeException: throws only if error on multithreaded code occured. <a class="el" href="a00003.html" title="cURL specific exception.">cURLException</a> is a kind of RuntimeException.</li>
+<li>DomainException: only <code>set_options()</code> can throw it.</li>
+</ul>
+<p>For more detailed description of class see it docs: <a class="el" href="a00002.html">cURL</a>. Functions with brief descriptions are listed in such order in that they are usualy accessed. </p>
+</div></div>
 <!--- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
